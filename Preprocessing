@@ -1,0 +1,88 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Feb  4 12:01:52 2017
+
+@author: Andina Kusumaningrum
+"""
+
+from openpyxl import load_workbook
+import nltk
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+import re
+from py2casefold import casefold
+
+
+
+#open excel // balikan tipe worksheet
+def open_xlsx(fileName, sheetName):
+    workbook = load_workbook(filename=fileName)
+    worksheet = workbook.get_sheet_by_name(sheetName)
+    return worksheet
+
+    
+#case folding 
+def casefolding (hadits):
+    for i in range (len(hadits)):
+        hadits[i] = casefold(hadits[i])
+    return hadits
+    
+
+#Remove '-' from punctuation // Balikan tipe string
+def remove_punct(punct, str):
+    punctuation = list(punct)
+    punctuation.remove("-")
+    punctuation = ''.join(punctuation)
+    punct_remove = re.compile('[%s]' % re.escape(punctuation)).sub('', str)
+    punct_remove = re.split(r'\s',punct_remove)
+    return punct_remove
+    
+#Tokenizer
+def tokenize(str):
+    tokens = nltk.word_tokenize(str)
+    return tokens
+    
+#stopword // balikan tipe array
+def stopwords(filenameTXT, str):
+    list_sw_removal = []
+    sw=open(filenameTXT, encoding='utf-8', mode='r');stop=sw.readlines();sw.close()
+    stop=[kata.strip() for kata in stop];stop=set(stop)
+    list_sw_removal = [i for i in str if i not in stop]
+    return list_sw_removal
+
+#stemming
+def stemming2(filenameTXT,array):
+    list_stem_out = []
+    feature = []
+    stem=open(filenameTXT, encoding='utf-8', mode='r'); stm=stem.readlines();stem.close()
+    factory = StemmerFactory()
+    stemmer = factory.create_stemmer()
+    for i in range (len(stm)):
+        feature.append(stm[i].strip('\n'))
+    for i in range(len(array)):
+        if array[i] not in feature:
+            output = stemmer.stem(array[i])
+            list_stem_out.append(output)
+        else:
+            list_stem_out.append(array[i])
+    return list(filter(None,list_stem_out))
+
+    
+def stopword_kbbi (array, kbbi):
+#==============================================================================
+#     stopword = open('words_kbbi.txt', encoding='utf-8', mode='r')
+#     sw = stopword.readlines()
+#     stopword.close()
+#     kbbi = []
+#     for i in range(len(sw)):
+#         kbbi.append(sw[i].strip('\n'))
+#==============================================================================
+    return [x for x in array if x in set(kbbi)]
+#    for fix in array:
+#        if fix not in kbbi:
+#            print(fix)
+#            
+#            array.pop(array.index(fix))
+#    for i in range(len(array)-1):
+#        if array[i] not in kbbi:
+#            array.pop(i)
+#    return array
