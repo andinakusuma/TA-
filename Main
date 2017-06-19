@@ -1,0 +1,100 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Feb  5 00:20:57 2017
+
+@author: Andina Kusumaningrum
+"""
+
+import Preprocessing as pre
+import TF_IDF as ti
+import pandas as pd
+import numpy as np
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn import svm
+from sklearn.metrics import confusion_matrix, recall_score, precision_score, f1_score
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+
+
+#Load Data
+list_hadits = []
+list_target = []
+
+worksheet = pre.open_xlsx("D:/DINA/TA Adiwijaya/Data Fix.xlsx", "Sheet")
+for i in range (2, worksheet.max_row+1):
+#for i in range (2, 512):
+    list_hadits.append((worksheet.cell(row = i, column = 3).value))
+    list_target.append((worksheet.cell(row = i, column = 4).value))
+
+#Preprocessing Data + TFIDF
+wordSet= []
+tf = []
+wordDict = []
+haditsAfterRemoval = []
+tfIdf = []
+
+#Testing
+list_tokenizing = []
+list_stemming = []
+list_sw_rem = []
+
+for hadits in list_hadits:
+    tokenizing = pre.tokenize(hadits)
+    list_tokenizing.append(tokenizing)
+    list_stem_out = pre.stemming2("feature.txt", tokenizing)
+    list_stemming.append(list_stem_out)
+    list_sw_removal = pre.stopwords("id.stopwords.02.01.2016.txt",list_stem_out)
+    list_sw_rem.append(list_sw_removal)
+    haditsAfterRemoval.append(list_sw_removal)
+wordSet = set().union(*haditsAfterRemoval)
+
+#TF-IDF
+for i in range (len(haditsAfterRemoval)):
+    wordDict.append(dict.fromkeys(wordSet, 0))
+    for kata in haditsAfterRemoval[i]:
+        wordDict[i][kata]+=1
+
+for i in range (len(haditsAfterRemoval)):
+    tf.append(ti.TF(wordDict[i], haditsAfterRemoval[i]))
+
+idfs = ti.IDF(wordDict)
+
+for i in range (len(haditsAfterRemoval)):
+    tfIdf.append(ti.TFIDF(tf[i] , idfs))
+
+#SVM
+Data = pd.DataFrame(tfIdf)
+Target = np.array(list_target)
+class_names = [1,2,3]
+
+Data_train, Data_test, Target_train, Target_test =train_test_split(Data, Target, random_state=0)
+
+clf = OneVsRestClassifier(svm.SVC(C=10, decision_function_shape= 'ovr', coef0=0.0, degree= 3, gamma = 1, kernel='poly'))
+Target_pred = clf.fit(Data_train, Target_train).predict(Data_test)
+print (confusion_matrix(Target_test, Target_pred))
+print (metrics.accuracy_score(Target_test, Target_pred))
+print (recall_score(Target_test, Target_pred, average='macro'))
+print (precision_score(Target_test, Target_pred, average='macro'))
+print (f1_score(Target_test, Target_pred, average='macro'))
+
+
+
+
+
+#for hadits in list_hadits:
+#    punct_remove = pre.remove_punct(punctuation, hadits)
+#    case_fold = pre.casefolding(punct_remove)
+#    list_sw_removal = pre.stopwords("id.stopwords.02.01.2016.txt",punct_remove)
+#    list_stem_out = pre.stemming2("feature.txt",list_sw_removal)
+#    haditsAfterRemoval.append(list_stem_out)
+
+#====================75%========================================================
+# list_stem_out = pre.stemming2("feature.txt",list_hadits)
+# for hadits in list_stem_out:
+#     tokenizing = pre.tokenize(hadits)  
+#     list_sw_removal = pre.stopwords("id.stopwords.02.01.2016.txt",tokenizing)
+# #    list_stop_kbbi = pre.stopword_kbbi(list_sw_removal, kbbi)
+#     haditsAfterRemoval.append(list_sw_removal)
+#==============================================================================
+
+
