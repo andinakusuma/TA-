@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Feb 19 21:19:07 2017
+
+@author: Andina Kusumaningrum
+"""
+
+import math
+
+idfDict = {}
+
+def TF(wordDict, bow):
+    tfDict = {}
+    bowCount = len(bow)
+    for kata, count in wordDict.items():
+        tfDict[kata] = count / float(bowCount)
+    return tfDict
+
+def IDF(docList):
+    N = len(docList)
+    
+    idfDict = dict.fromkeys(docList[0].keys(),0)
+    for doc in docList:
+        for kata, val in doc.items():
+            if val > 0:
+                idfDict[kata] += 1
+    for kata, val in idfDict.items():
+        idfDict[kata]= math.log(N/ float(val))
+    return idfDict
+
+def TFIDF(tfBow, idfs):
+    tfidf = {}
+    for kata, val in tfBow.items():
+            tfidf[kata] = val * idfs[kata]
+    return tfidf
