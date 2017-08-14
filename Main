@@ -78,23 +78,3 @@ print (precision_score(Target_test, Target_pred, average='macro'))
 print (f1_score(Target_test, Target_pred, average='macro'))
 
 
-
-
-
-#for hadits in list_hadits:
-#    punct_remove = pre.remove_punct(punctuation, hadits)
-#    case_fold = pre.casefolding(punct_remove)
-#    list_sw_removal = pre.stopwords("id.stopwords.02.01.2016.txt",punct_remove)
-#    list_stem_out = pre.stemming2("feature.txt",list_sw_removal)
-#    haditsAfterRemoval.append(list_stem_out)
-
-#====================75%========================================================
-# list_stem_out = pre.stemming2("feature.txt",list_hadits)
-# for hadits in list_stem_out:
-#     tokenizing = pre.tokenize(hadits)  
-#     list_sw_removal = pre.stopwords("id.stopwords.02.01.2016.txt",tokenizing)
-# #    list_stop_kbbi = pre.stopword_kbbi(list_sw_removal, kbbi)
-#     haditsAfterRemoval.append(list_sw_removal)
-#==============================================================================
-
-
